@@ -1,0 +1,209 @@
+<html>
+    <head>
+        <title>Leap Motion Web SDK</title>
+
+        <script src="script/three.js"></script>
+        <script src="script/socket.io.js"></script>
+        <script src="script/leap-motion/Element.js" type="module"></script>
+    </head>
+
+    <body>
+        <leap-motion></leap-motion>
+        <canvas></canvas>
+    </body>
+
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+
+    <script>
+        // ThreeJS
+
+        const canvas = document.getElementsByTagName("canvas")[0];
+        const renderer = new THREE.WebGLRenderer({canvas});
+        renderer.setPixelRatio(devicePixelRatio);
+
+        const camera = new THREE.PerspectiveCamera(
+            75, // Field of View (degrees)
+            2, // aspect ratio (width / height)
+            0.1, // near plane
+            1000, // far plane
+        );
+        camera.position.z = 250;
+        camera.position.y = 200;
+        camera.rotateX(-0.5);
+
+        const scene = new THREE.Scene();
+
+        const light = new THREE.DirectionalLight(
+            0xFFFFFF, // color
+            1, // intensity
+        );
+        light.position.set(-1, 2, 4);
+        scene.add(light);
+
+        const geometry = new THREE.BoxGeometry(
+            30, // width
+            30, // height
+            30, // depth
+        );
+        const material = new THREE.MeshPhongMaterial({
+            color : 0x44aa88,
+        });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.set(0, 125, 0)
+        scene.add(cube);
+
+
+        function resize() {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+            camera.aspect = width/height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height, false);
+        }
+
+        var needsResizing = true;
+        window.addEventListener("resize", event => {
+            needsResizing = true;
+        });
+
+        function renderCallback() {
+            if(needsResizing) {
+                resize();
+                needsResizing = false;
+            }
+
+            cube.rotation.x = Date.now() / 1000;
+            cube.rotation.y = Date.now() / 500;
+
+            if(leapMotionElement.leapMotion !== undefined) {
+                const frame = leapMotionElement.leapMotion.frame;
+                if(frame !== undefined) {
+                    handPoints.setFromHands(...frame.hands);
+                    
+                    frame.hands.forEach(hand => {
+                        if(hand.pinch.strength > 0.5 && cube.position.distanceTo(hand.fingers[1].btipPosition) < 45) {
+                            const midpoint = new THREE.Vector3();
+                            midpoint.add(hand.fingers[0].btipPosition);
+                            midpoint.add(hand.fingers[1].btipPosition);
+                            midpoint.multiplyScalar(0.5);
+                            cube.position.copy(midpoint);
+                        }
+                    });   
+                }
+                 
+            }
+            
+
+            renderer.render(scene, camera);
+
+            requestAnimationFrame(renderCallback);
+        }
+
+        requestAnimationFrame(renderCallback);
+    </script>
+
+    <script>
+        // Drawing hands
+
+        class HandPoints {
+            constructor() {
+                this.geometry = new THREE.BufferGeometry();
+                this.material = new THREE.PointsMaterial({
+                    size : 15,
+                    vertexColors : THREE.VertexColors,
+                });
+
+                const positions = [];
+                const colors = [];
+
+                this.geometry.addAttribute(
+                    "position",
+                    new THREE.Float32BufferAttribute(this.positions, 3)
+                );
+                this.geometry.addAttribute(
+                    "color",
+                    new THREE.Float32BufferAttribute(this.colors, 3)
+                );
+
+                this.geometry.colorsNeedUpdate = true;
+
+                this.points = new THREE.Points(
+                    this.geometry,
+                    this.material
+                );
+
+                this.points.frustumCulled = false;
+
+                scene.add(this.points);
+            }
+
+            setFromHands(...hands) {
+                const positions = [];
+                const colors = [];
+
+                hands.forEach(hand => {
+                    positions.push(...hand.elbow.toArray());
+                    colors.push(1, 1, 1);
+
+                    positions.push(...hand.wrist.toArray());
+                    colors.push(1, 1, 1);
+
+                    positions.push(...hand.palm.position.toArray());
+                    colors.push(0.5, 0.5, 0.5);
+
+                    hand.fingers.forEach((finger, index) => {
+                        positions.push(...finger.carpPosition.toArray());
+                        colors.push(1, 1, 1);
+
+                        positions.push(...finger.mcpPosition.toArray());
+                        colors.push(1, 1, 102/255);
+
+                        positions.push(...finger.pipPosition.toArray());
+                        colors.push(51/255, 204/255, 51/255);
+
+                        positions.push(...finger.dipPosition.toArray());
+                        colors.push(0, 153/255, 1);
+
+                        positions.push(...finger.btipPosition.toArray());
+                        colors.push(1, 102/255, 102/255);
+                    });
+                });
+
+                this.geometry.addAttribute(
+                    "position",
+                    new THREE.Float32BufferAttribute(positions, 3)
+                );
+                this.geometry.addAttribute(
+                    "color",
+                    new THREE.Float32BufferAttribute(colors, 3)
+                );
+            }
+        }
+
+        var handPoints = new HandPoints();
+        
+    </script>
+
+
+    <script>
+        // Leap Motion
+
+        const leapMotionElement = document.getElementsByTagName("leap-motion")[0];
+        leapMotionElement.addEventListener("load", event => {
+            leapMotionElement.leapMotion.connect();
+        });
+    </script>
+</html>
