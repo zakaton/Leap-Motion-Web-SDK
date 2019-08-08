@@ -2,8 +2,7 @@
 
 class Bone {
     constructor(basis, type) {
-        this.basis = new THREE.Matrix3();
-        this.basis.fromArray(basis.flat());
+        this.basis = basis;
 
         this.type = type;
         this.name = this.constructor.names[this.type];

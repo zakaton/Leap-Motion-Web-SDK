@@ -5,7 +5,8 @@
 
 /*
     TODO
-        *
+        figure out a way to allow custom ways of sending/receiving data
+            socket.io, webRTC, websockets, etc
 */
 
 import Frame from "./classes/Frame.js";

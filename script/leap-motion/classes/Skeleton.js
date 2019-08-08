@@ -1,8 +1,6 @@
 /*
-    Takes in a hand, outputs a skeleton
-    use hands to update the skeleton
-    automatically updated by hands of the given id
-    can also add helpers for motion and stuff
+    TODO
+        *
 */
 
 // https://threejs.org/docs/#api/en/objects/Bone
@@ -14,38 +12,42 @@ class Skeleton extends THREE.Skeleton {
     constructor(hand) {
         const bones = [];
 
-        const elbow = new THREE.Bone();
-        elbow.name = "elbow";
-        bones.push(elbow);
+        const forearm = new THREE.Bone();
+        forearm.name = `${hand.type} forearm`;
+        bones.push(forearm);
 
         const wrist = new THREE.Bone();
-        wrist.name = "wrist";
-        elbow.add(wrist);
-        bones.push(elbow);
+        wrist.name = `${hand.type} wrist`;
+        forearm.add(wrist);
+        bones.push(wrist);
 
-        const palm = new THREE.Bone();
-        palm.name = "palm";
-        wrist.add(palm);
-        bones.push(palm);
-
-        hand.fingers.forEach((finger, index) => {
+        hand.fingers.forEach(finger => {
             // https://developer-archive.leapmotion.com/documentation/javascript/devguide/Intro_Skeleton_API.html
-
+            
             const metacarpal = new THREE.Bone();
-            metacarpal.name = `${finger.typeString} metacarpal`;
-            palm.add(metacarpal);
+            metacarpal.name = `${hand.type} ${finger.name} ${finger.metacarpal.name}`;
+            bones.push(metacarpal);
+            wrist.add(metacarpal);
 
             const proximal = new THREE.Bone();
-            proximal.name = `${finger.typeString} proximal`;
+            proximal.name = `${hand.type} ${finger.name} ${finger.proximal.name}`;
+            bones.push(proximal);
             metacarpal.add(proximal);
 
-            const intermediate = new THREE.Bone();
-            intermediate.name = `${finger.typeString} intermediate`;
-            proximal.add(intermediate);
+            const medial = new THREE.Bone();
+            medial.name = `${hand.type} ${finger.name} ${finger.medial.name}`;
+            bones.push(medial);
+            proximal.add(medial);
 
             const distal = new THREE.Bone();
-            distal.name = `${finger.typeString} distal`;
-            intermediate.add(distal);
+            distal.name = `${hand.type} ${finger.name} ${finger.distal.name}`;
+            bones.push(distal);
+            medial.add(distal);
+
+            const tip = new THREE.Bone();
+            tip.name = `${hand.type} ${finger.name} "tip"`;
+            bones.push(tip);
+            distal.add(tip);
         });
 
         super(bones);
@@ -54,17 +56,46 @@ class Skeleton extends THREE.Skeleton {
     }
 
     setFromHand(hand) {
-        const elbow = this.getBoneByName("elbow");
+        const forearm = this.getBoneByName(`${hand.type} forearm`);
+        forearm.setRotationFromMatrix(hand.arm.basis);
+        forearm.position.copy(hand.elbow);
 
-        const wrist = this.getBoneByName("wrist");
+        const wrist = this.getBoneByName(`${hand.type} wrist`);
+        this._updateBonePositionAndRotation(wrist, hand.wrist, hand.palm.basis);
+        
+        hand.fingers.forEach((finger, index) => {                      
+            const metacarpal = this.getBoneByName(`${hand.type} ${finger.name} ${finger.metacarpal.name}`);
+            this._updateBonePositionAndRotation(metacarpal, finger.metacarpal.position, finger.metacarpal.basis);
 
-        const palm = this.getBoneByName("palm");
+            const proximal = this.getBoneByName(`${hand.type} ${finger.name} ${finger.proximal.name}`);
+            this._updateBonePositionAndRotation(proximal, finger.proximal.position, finger.proximal.basis);
 
-        hand.fingers.forEach(finger => {
-            finger.bones.forEach(bone => {
+            const medial = this.getBoneByName(`${hand.type} ${finger.name} ${finger.medial.name}`);
+            this._updateBonePositionAndRotation(medial, finger.medial.position, finger.medial.basis);
 
-            });
+            const distal = this.getBoneByName(`${hand.type} ${finger.name} ${finger.distal.name}`);
+            this._updateBonePositionAndRotation(distal, finger.distal.position, finger.distal.basis);
+
+            const tip = this.getBoneByName(`${hand.type} ${finger.name} "tip"`);
+            this._updateBonePosition(tip, finger.tipPosition);
         });
+    }
+
+    _updateBonePosition(bone, position) {
+        const _position = new THREE.Vector3(...position.toArray());
+        bone.parent.worldToLocal(_position);
+        bone.position.copy(_position);
+    }
+    _updateBoneRotation(bone, basis) {
+        const rotation = new THREE.Matrix4();
+        rotation.extractRotation(bone.parent.matrixWorld);
+        rotation.getInverse(rotation);
+        rotation.multiply(basis);
+        bone.setRotationFromMatrix(rotation);
+    }
+    _updateBonePositionAndRotation(bone, position, basis) {
+        this._updateBonePosition(bone, position);
+        this._updateBoneRotation(bone, basis);
     }
 }
 

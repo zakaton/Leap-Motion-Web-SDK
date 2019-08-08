@@ -3,24 +3,29 @@
 import Skeleton from "./Skeleton.js";
 
 class Hand {
-    constructor(handData, fingers) {
+    constructor(handData) {
         const {confidence, id, timeVisible, type} = handData;
         Object.assign(this, {confidence, id, timeVisible, type});
 
         const {armBasis, armWidth} = handData;
         this.arm = {
-            basis : new THREE.Vector3(...armBasis),
             width : armWidth,
+            basis : new THREE.Matrix4(),
         };
 
-        const {wrist} = handData;
-        this.wrist = new THREE.Vector3(...wrist);
-
-        const {direction} = handData;
-        this.direction = new THREE.Vector3(...direction);
+        {
+            // https://developer-archive.leapmotion.com/documentation/javascript/api/Leap.Hand.html#Hand.direction
+            const armBasisVectors = armBasis.map(vector => new THREE.Vector3(...vector));
+            if(this.type == "left") 
+                armBasisVectors[0].negate();
+            this.arm.basis.makeBasis(...armBasisVectors)
+        }
 
         const {elbow} = handData;
         this.elbow = new THREE.Vector3(...elbow);
+
+        const {wrist} = handData;
+        this.wrist = new THREE.Vector3(...wrist);
 
         const {grabAngle, grabStrength} = handData;
         this.grab = {
@@ -28,13 +33,30 @@ class Hand {
             strength : grabStrength,
         };
 
+        // https://developer-archive.leapmotion.com/documentation/javascript/api/Leap.Hand.html#Hand.direction
+        const {direction} = handData;
+        this.direction = new THREE.Vector3(...direction);
+
         const {palmNormal, palmPosition, palmVelocity, palmWidth} = handData;
         this.palm = {
             normal : new THREE.Vector3(...palmNormal),
             position : new THREE.Vector3(...palmPosition),
             velocity : new THREE.Vector3(...palmVelocity),
             width : palmWidth,
+            basis : new THREE.Matrix4(),
+            direction : this.direction,
         };
+        
+        {
+            const negatedPalmNormal = new THREE.Vector3();
+            negatedPalmNormal.copy(this.palm.normal); negatedPalmNormal.negate();
+
+            this.palm.basis.lookAt(
+                this.wrist, // center
+                this.palm.position, // eye
+                negatedPalmNormal, // up
+            );
+        }
 
         const {pinchDistance, pinchStrength} = handData;
         this.pinch = {
@@ -43,12 +65,6 @@ class Hand {
         };
 
         this.fingers = [];
-        fingers.forEach(finger => {
-            if(finger.handId == this.id) {
-                this.fingers[finger.type] = finger;
-                finger.hand = this;
-            }
-        });
     }
 
     get skeleton() {

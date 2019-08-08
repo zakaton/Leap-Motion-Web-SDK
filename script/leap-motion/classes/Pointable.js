@@ -3,7 +3,17 @@
 import Bone from "./Bone.js";
 
 class Pointable {
-    constructor(pointableData) {
+    constructor(pointableData, hands) {
+        const {id, handId} = pointableData;
+        this.id = id;
+        this.handId = handId;
+        this.hand = hands.find(hand => hand.id == this.handId);
+        
+        const {type} = pointableData;
+        this.type = type;
+        this.name = this.constructor.names[this.type];
+        this.hand.fingers[this.type] = this;
+
         // https://developer-archive.leapmotion.com/documentation/javascript/devguide/Intro_Skeleton_API.html
         const {carpPosition, mcpPosition, pipPosition, dipPosition, btipPosition} = pointableData;
         
@@ -15,7 +25,16 @@ class Pointable {
 
         const {bases} = pointableData;
         this.bones = bases.map((basis, index) => {
-            return new Bone(basis, index);
+            const basisVectors = basis.map(vector => new THREE.Vector3(...vector));
+            
+            // https://developer-archive.leapmotion.com/documentation/javascript/api/Leap.Bone.html#Bone.basis
+            if(this.hand.type == "left")
+                basisVectors[0].negate();
+            
+            const basisMatrix = new THREE.Matrix4();
+            basisMatrix.makeBasis(...basisVectors);
+
+            return new Bone(basisMatrix, index);
         });
     
         this.bones.forEach((bone, index) => {
@@ -31,18 +50,22 @@ class Pointable {
                 case "metacarpal":
                     this.metacarpal = bone;
                     bone.length = this.carpPosition.distanceTo(this.mcpPosition);
+                    bone.position = this.carpPosition;
                     break;
                 case "proximal":
                     this.proximal = bone;
-                    bone.length = this.mcpPosition.distanceTo(this.pipPosition)
+                    bone.length = this.mcpPosition.distanceTo(this.pipPosition);
+                    bone.position = this.mcpPosition;
                     break;
                 case "medial":
                     this.medial = bone;
                     bone.length = this.pipPosition.distanceTo(this.dipPosition);
+                    bone.position = this.pipPosition;
                     break;
                 case "distal":
                     this.distal = bone;
                     bone.length = this.dipPosition.distanceTo(this.btipPosition);
+                    bone.position = this.dipPosition;
                     break;
                 default:
                     throw `undefined bone index ${index}`;
@@ -58,29 +81,21 @@ class Pointable {
         const {extended} = pointableData;
         this.extended = extended;
 
-        const {id, handId} = pointableData;
-        this.id = id;
-        this.handId = handId;
-
         const {length, width} = pointableData;
         this.length = length;
         this.width = width;
 
         const {timeVisible} = pointableData;
         this.timeVisible = timeVisible;
-
-        const {type} = pointableData;
-        this.type = type;
-        this.name = this.constructor.names[this.type];
     }
 
     static get names() {
         return [
             "thumb",
-            "index finger",
-            "middle finger",
-            "ring finger",
-            "pinky finger",
+            "index",
+            "middle",
+            "ring",
+            "pinky",
         ];
     }
 }

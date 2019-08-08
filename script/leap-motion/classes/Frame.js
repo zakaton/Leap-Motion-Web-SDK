@@ -9,8 +9,8 @@ class Frame {
             Object.assign(this, {currentFrameRate, id, timestamp});
 
         const {hands, pointables} = frameData;
-            this.pointables = pointables.map(pointableData => new Pointable(pointableData));
-            this.hands = hands.map(handData => new Hand(handData, this.pointables));
+            this.hands = hands.map(handData => new Hand(handData));
+            this.pointables = pointables.map(pointableData => new Pointable(pointableData, this.hands));
     }
 }
 

@@ -1,7 +1,9 @@
 /*
     TODO
-        Socket.IO Broadcasting
-            how to 
+        Re-design remote streaming to allow many ways to stream data
+            Websocket, Socket.io, webRTC, etc
+            can add a "load" eventlistener to implement how to send/receive data
+            can also add a "remote" attribute that prevents connecting to a local websocket on load
 */
 
 import LeapMotion from "./LeapMotion.js";
