@@ -31,22 +31,12 @@ class LeapMotionElement extends HTMLElement {
 
     static get observedAttributes() {
         return [
-            "send", "receive",
+            
         ].map(attributeName => attributeName.toLowerCase())
     }
 
     attributeChangedCallback(attributeName, oldValue, newValue) {
         switch(attributeName) {
-            case "send":
-                this.addEventListener("open", event => {
-                    this.leapMotion.startBroadcast(newValue);
-                });
-                break;
-            case "receive":
-                this.addEventListener("load", event => {
-                    this.leapMotion.listenToBroadcast(newValue);
-                });
-                break;
             default:
                 break;
         }

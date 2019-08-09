@@ -5,17 +5,12 @@
 
 /*
     TODO
-        figure out a way to allow custom ways of sending/receiving data
-            socket.io, webRTC, websockets, etc
+        *
 */
 
 import Frame from "./classes/Frame.js";
 
 class LeapMotion {
-    static get socketURL() {
-        return "https://leap-motion.glitch.me/";
-    }
-
     constructor() {
         this.addEventListener("message", event => this.messageCallback(event));
 
@@ -122,46 +117,6 @@ class LeapMotion {
         if(this.webSocket !== undefined) {
             this.webSocket.close();
             delete this.webSocket;    
-        }
-    }
-
-
-    startBroadcast(channel) {
-        if(this.socket == undefined) {
-            this.socket = new io(this.constructor.socketURL);
-            this.socket.on("connect", () => {
-                this.addEventListener("message", event => {
-                    const detail = event.detail;
-                    this.socket.emit("message", {detail, channel});
-                });
-            });
-        }
-    }
-    stopBroadcast() {
-        if(this.socket !== undefined) {
-            this.socket.close();
-            delete this.socket;
-        }
-    }
-
-    listenToBroadcast(channel) {
-        if(this.socket == undefined) {
-            this.socket = new io(this.constructor.socketURL);
-            this.socket.on("connect", () => {
-                this.socket.emit("join", {channel});
-                this.socket.on("message", message => {
-                    this.dispatchEvent(new CustomEvent("message", {
-                        bubbles : true,
-                        detail : message.detail,
-                    }));
-                });
-            });
-        }
-    }
-    stopListeningToBroadcast() {
-        if(this.socket !== undefined) {
-            this.socket.close();
-            delete this.socket;
         }
     }
 }

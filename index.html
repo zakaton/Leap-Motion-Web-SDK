@@ -4,7 +4,7 @@
 
         <script src="script/three.js"></script>
         <script src="script/socket.io.js"></script>
-        <script src="script/leap-motion/Element.js" type="module"></script>
+        <script src="dist/Element.js"></script>
     </head>
 
     <body>
@@ -202,6 +202,7 @@
         // Leap Motion
 
         const leapMotionElement = document.getElementsByTagName("leap-motion")[0];
+        leapMotionElement.leapMotion.connect();
         leapMotionElement.addEventListener("load", event => {
             leapMotionElement.leapMotion.connect();
         });
