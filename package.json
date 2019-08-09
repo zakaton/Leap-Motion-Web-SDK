@@ -1,0 +1,20 @@
+{
+  "name": "Leap-Motion-Web-SDK",
+  "version": "1.0.0",
+  "description": "_I'll add proper documentation when \"complete\"_",
+  "main": "index.js",
+  "scripts": {
+    "build": "parcel build script/leap-motion/Element.js -d script --out-file leap-motion.js --no-source-maps --no-cache "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zakaton/Leap-Motion-Web-SDK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zakaton/Leap-Motion-Web-SDK/issues"
+  },
+  "homepage": "https://github.com/zakaton/Leap-Motion-Web-SDK#readme"
+}

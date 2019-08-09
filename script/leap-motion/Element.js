@@ -14,7 +14,7 @@ class LeapMotionElement extends HTMLElement {
 
         this.leapMotion = new LeapMotion();
 
-        this.leapMotion.constructor.eventTypes.forEach(eventName => {
+        LeapMotion.eventTypes.forEach(eventName => {
             this.leapMotion.addEventListener(eventName, event => this.dispatchEvent(event));
         });
     }
@@ -31,13 +31,33 @@ class LeapMotionElement extends HTMLElement {
 
     static get observedAttributes() {
         return [
-            
-        ].map(attributeName => attributeName.toLowerCase())
+            "open",
+            "framesLength",
+        ].concat(LeapMotion.eventTypes.map(eventName => {
+            return `on${eventName}`;
+        })).map(attributeName => attributeName.toLowerCase())
     }
 
     attributeChangedCallback(attributeName, oldValue, newValue) {
         switch(attributeName) {
+            case "open":
+                this.addEventListener("load", event => {
+                    this.leapMotion.open();
+                });
+                break;
+            case "framesLength".toLowerCase():
+                const framesLength = Number(newValue);
+                if(!isNaN(framesLength))
+                    this.leapMotion.framesLength = framesLength;
+                break;
             default:
+                if(attributeName.startsWith("on")) {
+                    LeapMotion.eventTypes.forEach(eventName => {
+                        if(eventName.toLowerCase() == attributeName.substr(2)) {
+                            this.addEventListener(eventName, event => eval(newValue))
+                        }
+                    });
+                }
                 break;
         }
     }

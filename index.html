@@ -3,8 +3,7 @@
         <title>Leap Motion Web SDK</title>
 
         <script src="script/three.js"></script>
-        <script src="script/socket.io.js"></script>
-        <script src="dist/Element.js"></script>
+        <script src="script/leap-motion.js"></script>
     </head>
 
     <body>
@@ -202,9 +201,9 @@
         // Leap Motion
 
         const leapMotionElement = document.getElementsByTagName("leap-motion")[0];
-        leapMotionElement.leapMotion.connect();
+        leapMotionElement.leapMotion.open();
         leapMotionElement.addEventListener("load", event => {
-            leapMotionElement.leapMotion.connect();
+            leapMotionElement.leapMotion.open();
         });
     </script>
 </html>

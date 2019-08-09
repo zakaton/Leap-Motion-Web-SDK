@@ -5,7 +5,7 @@
 
 /*
     TODO
-        *
+        Events for individual hands/pointables?
 */
 
 import Frame from "./classes/Frame.js";
@@ -19,8 +19,7 @@ class LeapMotion {
         this.addEventListener("frame", event => {
             const frame = event.detail;
             this.frames.unshift(frame);
-            if(this.frames.length > this.framesLength)
-                this.frames.pop();
+            this.frames.splice(this.framesLength);
         });
     }
 
@@ -33,7 +32,7 @@ class LeapMotion {
                 "device",
                     "deviceConnected", "deviceDisconnected",
                     "startedStreaming", "stoppedStreaming",
-                "raw-frame", "frame",
+                "rawframe", "frame",
         ];
     }
 
@@ -81,7 +80,7 @@ class LeapMotion {
         } else if(data.hasOwnProperty("currentFrameRate")) {
             this.frame = new Frame(data);
 
-            this.dispatchEvent(new CustomEvent("raw-frame", {
+            this.dispatchEvent(new CustomEvent("rawframe", {
                 bubbles : false,
                 detail : data,
             }));
@@ -93,27 +92,37 @@ class LeapMotion {
         }
     }
 
-    connect() {
-        this.webSocket = new WebSocket("ws://localhost:6437/v7.json");
+    open() {
+        if(this.webSocket == undefined) {
+            this.webSocket = new WebSocket("ws://localhost:6437/v7.json");
 
-        this.webSocket.addEventListener("open", event => {
-            this.dispatchEvent(new CustomEvent("open", {
-                bubbles : false,
-            }));
-
-            this.webSocket.addEventListener("message", event => this.dispatchEvent(new CustomEvent("message", {
-                bubbles : false,
-                detail : event.data,
-            })));
-
-            this.webSocket.addEventListener("close", event => {
-                this.dispatchEvent(new CustomEvent("close", {
+            this.webSocket.addEventListener("open", event => {
+                this.dispatchEvent(new CustomEvent("open", {
                     bubbles : false,
                 }));
-            });
-        });
+
+                this.webSocket.addEventListener("message", event => this.dispatchEvent(new CustomEvent("message", {
+                    bubbles : false,
+                    detail : event.data,
+                })));
+
+                this.webSocket.addEventListener("close", event => {
+                    this.dispatchEvent(new CustomEvent("close", {
+                        bubbles : false,
+                    }));
+                });
+            });    
+        }
+        else {
+            if(this.webSocket.readyState !== 1) {
+                // re-open the websocket
+                delete this.webSocket;
+                this.open();
+            }
+        }
     }
-    disconnct() {
+
+    close() {
         if(this.webSocket !== undefined) {
             this.webSocket.close();
             delete this.webSocket;    
