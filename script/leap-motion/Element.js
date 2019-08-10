@@ -28,7 +28,6 @@ class LeapMotionElement extends HTMLElement {
         // when removed from a DOM
     }
 
-
     static get observedAttributes() {
         return [
             "open",
@@ -63,7 +62,7 @@ class LeapMotionElement extends HTMLElement {
     }
 }
 
-if(document.createElement("leap-motion").constructor == HTMLElement)
+if(document.createElement("leap-motion").constructor.name == "HTMLElement")
     customElements.define("leap-motion", LeapMotionElement);
 
 export default LeapMotionElement;

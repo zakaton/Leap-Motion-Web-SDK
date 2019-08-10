@@ -45,6 +45,24 @@ class Hand {
             width : palmWidth,
             basis : new THREE.Matrix4(),
             direction : this.direction,
+            
+            // lazy evaluation for yaw/pitch/roll
+            get euler() {
+                if(this._euler == undefined) {
+                    this._euler = new THREE.Euler();
+                    this._euler.setFromRotationMatrix(this.basis);
+                }
+                return this._euler;
+            },
+            get yaw() {
+                return this.euler.y;
+            },
+            get pitch() {
+                return this.euler.x;
+            },
+            get roll() {
+                return this.euler.z;
+            },
         };
         
         {
