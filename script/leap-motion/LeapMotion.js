@@ -5,10 +5,11 @@
 
 /*
     TODO
-        Events for individual hands/pointables?
+        *
 */
 
 import Frame from "./classes/Frame.js";
+import {EventDispatcher} from "../../node_modules/three/src/core/EventDispatcher.js";
 
 class LeapMotion {
     constructor() {
@@ -43,7 +44,7 @@ class LeapMotion {
             this.serviceVersion = data.serviceVersion;
             this.version = data.version;
             
-            this.dispatchEvent(new CustomEvent("version", {
+            this.dispatchEvent(new LeapMotion.CustomEvent("version", {
                 bubbles : false,
                 detail : event,
             }));
@@ -58,20 +59,20 @@ class LeapMotion {
                     this.streaming = streaming;
                     this.type = type;
 
-                    this.dispatchEvent(new CustomEvent("device", {
+                    this.dispatchEvent(new LeapMotion.CustomEvent("device", {
                         bubbles : false,
                         detail : data,
                     }));
 
-                    this.dispatchEvent(new CustomEvent(`device${data.event.state.attached? "Connected":"Disconnected"}`, {
+                    this.dispatchEvent(new LeapMotion.CustomEvent(`device${data.event.state.attached? "Connected":"Disconnected"}`, {
                         bubbles : false,
                     }));
-                    this.dispatchEvent(new CustomEvent(`${data.event.state.streaming? "started":"stopped"}Streaming`, {
+                    this.dispatchEvent(new LeapMotion.CustomEvent(`${data.event.state.streaming? "started":"stopped"}Streaming`, {
                         bubbles : false,
                     }));
                     break;
                 default:
-                    this.dispatchEvent(new CustomEvent("unknown", {
+                    this.dispatchEvent(new LeapMotion.CustomEvent("unknown", {
                         bubbles : false,
                         detail : data,
                     }));
@@ -80,12 +81,12 @@ class LeapMotion {
         } else if(data.hasOwnProperty("currentFrameRate")) {
             this.frame = new Frame(data);
 
-            this.dispatchEvent(new CustomEvent("rawframe", {
+            this.dispatchEvent(new LeapMotion.CustomEvent("rawframe", {
                 bubbles : false,
                 detail : data,
             }));
 
-            this.dispatchEvent(new CustomEvent("frame", {
+            this.dispatchEvent(new LeapMotion.CustomEvent("frame", {
                 bubbles : false,
                 detail : this.frame,
             }));
@@ -94,20 +95,22 @@ class LeapMotion {
 
     open() {
         if(this.webSocket == undefined) {
-            this.webSocket = new WebSocket("ws://localhost:6437/v7.json");
+            this.webSocket = new LeapMotion.WebSocket("ws://localhost:6437/v7.json");
 
             this.webSocket.addEventListener("open", event => {
-                this.dispatchEvent(new CustomEvent("open", {
+                this.dispatchEvent(new LeapMotion.CustomEvent("open", {
                     bubbles : false,
                 }));
 
-                this.webSocket.addEventListener("message", event => this.dispatchEvent(new CustomEvent("message", {
-                    bubbles : false,
-                    detail : event.data,
-                })));
+                this.webSocket.addEventListener("message", event => {
+                    this.dispatchEvent(new LeapMotion.CustomEvent("message", {
+                        bubbles : false,
+                        detail : event.data,
+                    }));
+                });
 
                 this.webSocket.addEventListener("close", event => {
-                    this.dispatchEvent(new CustomEvent("close", {
+                    this.dispatchEvent(new LeapMotion.CustomEvent("close", {
                         bubbles : false,
                     }));
                 });
@@ -130,6 +133,20 @@ class LeapMotion {
     }
 }
 
-Object.assign(LeapMotion.prototype, THREE.EventDispatcher.prototype);
+if(typeof WebSocket !== "undefined") {
+    LeapMotion.WebSocket = WebSocket;
+}
+if(typeof CustomEvent !== "undefined") {
+    LeapMotion.CustomEvent = class extends CustomEvent {};
+    Object.defineProperty(LeapMotion.CustomEvent.prototype, "target", {writable : true});
+}
 
+Object.assign(LeapMotion.prototype, EventDispatcher.prototype);
+
+
+// When building for Node for Max, uncomment the line below:
+// module.exports = LeapMotion
+// and comment out the line below:
 export default LeapMotion;
+// and then run the line below:
+// parcel build script/leap-motion/LeapMotion.js -d max/node-for-max --out-file leap-motion.js--no-source-maps --no-cache

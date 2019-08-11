@@ -4,7 +4,7 @@
   "description": "_I'll add proper documentation when \"complete\"_",
   "main": "index.js",
   "scripts": {
-    "build": "parcel build script/leap-motion/Element.js -d . --out-file leap-motion.js --no-source-maps --no-cache && cp leap-motion.js extension & cp leap-motion.js max-patch & cp leap-motion.js max-for-live"
+    "build": "parcel build script/leap-motion/Element.js -d . --out-file leap-motion.js --no-source-maps --no-cache && cp leap-motion.js extension & cp leap-motion.js max/jweb/script"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/zakaton/Leap-Motion-Web-SDK/issues"
   },
-  "homepage": "https://github.com/zakaton/Leap-Motion-Web-SDK#readme"
+  "homepage": "https://github.com/zakaton/Leap-Motion-Web-SDK#readme",
+  "dependencies": {
+    "esm": "^3.2.25",
+    "three": "^0.107.0",
+    "ws": "^7.1.1"
+  }
 }
