@@ -3,7 +3,7 @@ _I'll add proper documentation when "complete"_
 
 ## 📚 Table of Contents
 [⚙️ Setting Up](#-setting-up)  
-[👋 Tracking Data](#-tracking-data) 
+[👋 Tracking Data](#-tracking-data)  
 [🔧 Extensions](#-extensions)  
 [📡 Streaming](#-streaming)  
 [🧰 Chrome Extensions](#-chrome-extensions)  
