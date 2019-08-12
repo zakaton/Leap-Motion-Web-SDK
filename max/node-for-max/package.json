@@ -1,0 +1,17 @@
+{
+  "name": "leap-for-node-for-max",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esm": "^3.2.25",
+    "three": "^0.107.0",
+    "ws": "^7.1.2"
+  }
+}

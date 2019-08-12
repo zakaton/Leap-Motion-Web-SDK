@@ -1,4 +1,5 @@
 const maxAPI = require("max-api");
+const LiveObjectModel = require("./live-object-model.js");
 
 const LeapMotion = require("./leap-motion.js");
 

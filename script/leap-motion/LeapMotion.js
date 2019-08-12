@@ -144,9 +144,7 @@ if(typeof CustomEvent !== "undefined") {
 Object.assign(LeapMotion.prototype, EventDispatcher.prototype);
 
 
-// When building for Node for Max, uncomment the line below:
+// When building for Node, uncomment the line below:
 // module.exports = LeapMotion
 // and comment out the line below:
 export default LeapMotion;
-// and then run the line below:
-// parcel build script/leap-motion/LeapMotion.js -d max/node-for-max --out-file leap-motion.js--no-source-maps --no-cache

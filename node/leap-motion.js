@@ -1,9 +1,5 @@
-const WebSocket = require("ws");
-
-const esmRequire = require("esm")(module);
-const LeapMotion = esmRequire("./LeapMotion.js");
-
-LeapMotion.WebSocket = WebSocket;
+const LeapMotion = require("esm")(module)("./LeapMotion.js");
+LeapMotion.WebSocket = require("ws");
 LeapMotion.CustomEvent = class {
     constructor(type, options) {
         this.type = type;
