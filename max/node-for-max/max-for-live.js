@@ -1,11 +1,13 @@
+// https://help.ableton.com/hc/en-us/articles/209071389-Controlling-Live-using-Max-for-Live-Tutorial-
+// https://docs.cycling74.com/max6/dynamic/c74_docs.html#live_object_model
+
 const maxAPI = require("max-api");
-const LiveObjectModel = require("./live-object-model.js");
 
 const LeapMotion = require("./leap-motion.js");
-
 const leapMotion = new LeapMotion();
+
 leapMotion.addEventListener("frame", event => {
-    // add your custom code here
+    // add custom code here
 });
 leapMotion.open();
 

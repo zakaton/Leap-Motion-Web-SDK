@@ -1,4 +1,5 @@
 const maxAPI = require("max-api");
+maxAPI.post("Hello");
 
 const LeapMotion = require("./leap-motion.js");
 
