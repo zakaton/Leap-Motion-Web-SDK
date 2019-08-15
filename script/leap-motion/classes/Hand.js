@@ -1,7 +1,5 @@
 // https://developer-archive.leapmotion.com/documentation/javascript/api/Leap.Hand.html
 
-import Skeleton from "./Skeleton.js";
-
 import {Vector3} from "../../../node_modules/three/src/math/Vector3.js";
 import {Matrix4} from "../../../node_modules/three/src/math/Matrix4.js";
 import {Euler} from "../../../node_modules/three/src/math/Euler.js";
@@ -87,11 +85,6 @@ class Hand {
         };
 
         this.fingers = [];
-    }
-
-    get skeleton() {
-        this._skeleton = this._skeleton || new Skeleton(this);
-        return this._skeleton;
     }
 }
 

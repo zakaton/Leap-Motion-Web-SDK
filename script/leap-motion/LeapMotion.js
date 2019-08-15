@@ -10,6 +10,7 @@
 
 import Frame from "./classes/Frame.js";
 import {EventDispatcher} from "../../node_modules/three/src/core/EventDispatcher.js";
+import Skeleton from "./classes/Skeleton.js";
 
 class LeapMotion {
     constructor() {
@@ -22,6 +23,8 @@ class LeapMotion {
             this.frames.unshift(frame);
             this.frames.splice(this.framesLength);
         });
+
+        this.skeleton = new Skeleton();
     }
 
     static get eventTypes() {
@@ -80,6 +83,7 @@ class LeapMotion {
             }
         } else if(data.hasOwnProperty("currentFrameRate")) {
             this.frame = new Frame(data);
+            this.skeleton.setFromHands(...this.frame.hands);
 
             this.dispatchEvent(new LeapMotion.CustomEvent("rawframe", {
                 bubbles : false,
