@@ -20,7 +20,7 @@
   "homepage": "https://github.com/zakaton/Leap-Motion-Web-SDK#readme",
   "dependencies": {
     "esm": "^3.2.25",
-    "three": "^0.107.0",
+    "three": "^0.125.0",
     "ws": "^7.1.1"
   }
 }
