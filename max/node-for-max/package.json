@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "esm": "^3.2.25",
-    "three": "^0.107.0",
+    "three": "^0.137.0",
     "ws": "^7.1.2"
   }
 }
